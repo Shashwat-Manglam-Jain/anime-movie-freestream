@@ -1,6 +1,6 @@
 import { cached } from "./cache";
 
-const MANGADEX_API = "https://api.mangadex.org";
+const MANGADEX_API = typeof window !== "undefined" ? "/api/mangadex" : "https://api.mangadex.org";
 const COMICK_API = "https://comick.art/api";
 
 export interface MangaItem {
