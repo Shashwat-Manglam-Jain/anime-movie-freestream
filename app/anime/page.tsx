@@ -83,10 +83,10 @@ export default async function AnimePage({
         <h1 className="text-3xl font-bold tracking-tight">
           {headings[filter].title}
         </h1>
-        <p className="mt-1 text-zinc-500">{headings[filter].desc}</p>
+        <p className="mt-1 text-muted-foreground">{headings[filter].desc}</p>
       </div>
 
-      <div className="flex gap-1 rounded-lg bg-white/5 p-1 w-fit mb-6 overflow-x-auto">
+      <div className="flex gap-1 rounded-lg bg-black/5 dark:bg-white/5 p-1 w-fit mb-6 overflow-x-auto">
         {filters.map((f) => (
           <Link
             key={f.value}
@@ -94,7 +94,7 @@ export default async function AnimePage({
             className={`rounded-md px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
               filter === f.value
                 ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-                : "text-zinc-400 hover:text-white hover:bg-white/5"
+                : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
             }`}
           >
             {f.label}

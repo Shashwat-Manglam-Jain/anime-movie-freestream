@@ -25,7 +25,7 @@ export function ExpandableText({ text, maxLines = 2, className = "" }: Expandabl
 
   return (
     <div className={className}>
-      <p className={`text-sm text-zinc-500 ${expanded ? "" : clampClass}`}>
+      <p className={`text-sm text-muted-foreground ${expanded ? "" : clampClass}`}>
         {text}
       </p>
       {needsExpansion && (

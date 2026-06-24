@@ -20,12 +20,28 @@ import { TOP_MOVIES, MOVIE_COLLECTIONS } from "@/lib/curated";
 import { MovieCollection } from "@/components/movie-collection";
 import { SimilarMovies } from "@/components/similar-movies";
 
+interface TmdbDetail {
+  id: number;
+  title: string;
+  overview: string | null;
+  poster: string | null;
+  backdrop: string | null;
+  rating: string | null;
+  year: number | null;
+  genres: string[];
+  runtime: number | null;
+  status: string | null;
+  similar: { id: number; title: string; poster: string; rating: string; year: number }[];
+}
+
 export default function MoviePage() {
   const params = useParams<{ id: string }>();
   const [providers, setProviders] = useState<StreamProvider[]>([]);
   const [providerIdx, setProviderIdx] = useState(0);
+  const [tmdbData, setTmdbData] = useState<TmdbDetail | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const movie = TOP_MOVIES.find((m) => String(m.tmdbId) === params.id);
+  const curated = TOP_MOVIES.find((m) => String(m.tmdbId) === params.id);
 
   useEffect(() => {
     const prefs = getProviderPrefs();
@@ -40,16 +56,27 @@ export default function MoviePage() {
   }, []);
 
   useEffect(() => {
-    if (!movie && providers.length === 0) return;
+    fetch(`/api/tmdb?action=detail&type=movie&id=${params.id}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.id) setTmdbData(d);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [params.id]);
+
+  useEffect(() => {
+    const title = tmdbData?.title || curated?.title || `Movie #${params.id}`;
+    const poster = tmdbData?.poster || curated?.poster || "";
     updateContinueWatching({
       id: `movie-${params.id}`,
       type: "movie",
-      title: movie?.title || `Movie #${params.id}`,
-      poster: movie?.poster || "",
+      title,
+      poster,
       watchUrl: `/movie/${params.id}`,
       lastWatchedAt: Date.now(),
     });
-  }, [params.id, movie, providers]);
+  }, [params.id, tmdbData, curated]);
 
   const selectServer = useCallback(
     (idx: number) => {
@@ -67,67 +94,97 @@ export default function MoviePage() {
 
   const selectedProvider = providers[providerIdx] || null;
   const streamUrl = selectedProvider?.buildMovieUrl?.(params.id) || null;
-  const genres = movie?.genre.split(", ") || [];
+
+  const title = tmdbData?.title || curated?.title || `Movie #${params.id}`;
+  const poster = tmdbData?.poster || curated?.poster || "";
+  const backdrop = tmdbData?.backdrop || null;
+  const rating = tmdbData?.rating || curated?.rating || null;
+  const year = tmdbData?.year || curated?.year || null;
+  const overview = tmdbData?.overview || null;
+  const genres = tmdbData?.genres || curated?.genre?.split(", ") || [];
+  const runtime = tmdbData?.runtime || null;
 
   const tmdbIdNum = Number(params.id);
   const collection = MOVIE_COLLECTIONS.find((c) => c.tmdbIds.includes(tmdbIdNum));
 
-  const currentGenres = movie?.genre.split(", ") || [];
-  const similarMovies = currentGenres.length > 0
+  const tmdbSimilar = (tmdbData?.similar || []).map((s) => ({
+    title: s.title,
+    year: s.year,
+    tmdbId: s.id,
+    poster: s.poster,
+    rating: s.rating,
+  }));
+
+  const curatedGenres = curated?.genre?.split(", ") || [];
+  const curatedSimilar = curatedGenres.length > 0
     ? TOP_MOVIES.filter(
-        (m) =>
-          m.tmdbId !== tmdbIdNum &&
-          m.genre.split(", ").some((g) => currentGenres.includes(g))
-      )
-        .sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating))
+        (m) => m.tmdbId !== tmdbIdNum && m.genre.split(", ").some((g) => curatedGenres.includes(g))
+      ).sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating))
     : [];
+
+  const similarMovies = tmdbSimilar.length > 0 ? tmdbSimilar : curatedSimilar;
 
   return (
     <div>
-      <div className="relative h-48 md:h-64 w-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-950 via-fuchsia-950/50 to-zinc-950" />
+      <div className="relative h-48 md:h-72 w-full overflow-hidden">
+        {backdrop ? (
+          <img src={backdrop} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-950 via-fuchsia-950/50 to-zinc-950" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/60 to-transparent" />
       </div>
 
       <div className="mx-auto max-w-7xl px-4 pb-16">
         <div className="flex flex-col md:flex-row gap-6 -mt-32 relative z-10">
           <div className="shrink-0">
-            <div className="relative w-40 md:w-48 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-              <PosterImage
-                src={movie?.poster || ""}
-                alt={movie?.title || "Movie"}
-                fill
-                className="object-cover"
-                sizes="192px"
-                priority
-              />
+            <div className="relative w-40 md:w-48 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
+              {poster ? (
+                <PosterImage src={poster} alt={title} fill className="object-cover" sizes="192px" priority />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-muted text-muted-foreground text-xs">
+                  No Poster
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex-1 space-y-3 pt-2">
-            <h1 className="text-2xl md:text-4xl font-black tracking-tight">
-              {movie?.title || `Movie #${params.id}`}
-            </h1>
-            <div className="flex flex-wrap gap-2">
-              {movie?.rating && (
-                <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20">★ {movie.rating}</Badge>
-              )}
-              {movie?.year && (
-                <Badge variant="outline" className="border-white/10">{movie.year}</Badge>
-              )}
-              <Badge variant="outline" className="border-white/10">Movie</Badge>
-            </div>
-            {genres.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {genres.map((g) => (
-                  <Badge key={g} variant="secondary" className="bg-white/5 text-zinc-300 text-xs">{g}</Badge>
-                ))}
+            {loading ? (
+              <div className="animate-pulse space-y-3">
+                <div className="h-8 w-2/3 rounded bg-black/5 dark:bg-white/5" />
+                <div className="h-4 w-1/3 rounded bg-black/5 dark:bg-white/5" />
+                <div className="h-20 rounded bg-black/5 dark:bg-white/5" />
               </div>
-            )}
-            {movie && (
-              <WatchlistButton
-                item={{ id: `movie-${movie.tmdbId}`, type: "movie", title: movie.title, poster: movie.poster, addedAt: Date.now() }}
-              />
+            ) : (
+              <>
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight">{title}</h1>
+                <div className="flex flex-wrap gap-2">
+                  {rating && (
+                    <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20">★ {rating}</Badge>
+                  )}
+                  {year && (
+                    <Badge variant="outline" className="border-border">{year}</Badge>
+                  )}
+                  <Badge variant="outline" className="border-border">Movie</Badge>
+                  {runtime && (
+                    <Badge variant="outline" className="border-border">{runtime} min</Badge>
+                  )}
+                </div>
+                {genres.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {genres.map((g) => (
+                      <Badge key={g} variant="secondary" className="bg-black/5 dark:bg-white/5 text-foreground/70 text-xs">{g}</Badge>
+                    ))}
+                  </div>
+                )}
+                {overview && (
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">{overview}</p>
+                )}
+                <WatchlistButton
+                  item={{ id: `movie-${params.id}`, type: "movie", title, poster, addedAt: Date.now() }}
+                />
+              </>
             )}
           </div>
         </div>
@@ -135,7 +192,7 @@ export default function MoviePage() {
         <div className="mt-8 space-y-4">
           {providers.length > 1 && (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Server:</span>
+              <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Server:</span>
               {providers.map((p, i) => (
                 <button
                   key={p.id}
@@ -143,7 +200,7 @@ export default function MoviePage() {
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                     providerIdx === i
                       ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-                      : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+                      : "bg-black/5 dark:bg-white/5 text-muted-foreground hover:bg-black/10 dark:hover:bg-white/10 hover:text-foreground"
                   }`}
                 >
                   {p.name}
@@ -154,8 +211,8 @@ export default function MoviePage() {
           {streamUrl ? (
             <VideoPlayer src={streamUrl} onTryNext={handleTryNext} hasNextServer={providers.length > 1} />
           ) : (
-            <div className="aspect-video rounded-xl bg-zinc-900 flex items-center justify-center">
-              <p className="text-zinc-500">No streaming provider available. Enable one in Settings.</p>
+            <div className="aspect-video rounded-xl bg-muted flex items-center justify-center">
+              <p className="text-muted-foreground">No streaming provider available. Enable one in Settings.</p>
             </div>
           )}
         </div>

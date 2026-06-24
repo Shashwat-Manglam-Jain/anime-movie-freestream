@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { HorizontalScroll } from "@/components/horizontal-scroll";
 import type { AnimeRecommendation } from "@/lib/jikan";
 
 interface SimilarAnimeProps {
@@ -10,16 +13,16 @@ export function SimilarAnime({ recommendations }: SimilarAnimeProps) {
   if (recommendations.length === 0) return null;
 
   return (
-    <div className="space-y-3 pt-4 border-t border-white/5">
+    <div className="space-y-3 pt-4 border-t border-border">
       <h3 className="text-lg font-bold">Similar Anime</h3>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      <HorizontalScroll>
         {recommendations.map((anime) => (
           <Link
             key={anime.mal_id}
             href={`/watch/mal/${anime.mal_id}/1/sub`}
             className="shrink-0 group w-[120px]"
           >
-            <div className="relative aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-white/5 group-hover:ring-violet-500/40 transition-all">
+            <div className="relative aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-black/5 dark:ring-white/5 group-hover:ring-violet-500/40 transition-all">
               <Image
                 src={anime.images.webp?.large_image_url || anime.images.jpg.large_image_url}
                 alt={anime.title}
@@ -36,12 +39,12 @@ export function SimilarAnime({ recommendations }: SimilarAnimeProps) {
                 </div>
               </div>
             </div>
-            <p className="mt-1.5 text-xs font-medium text-zinc-300 line-clamp-2 group-hover:text-violet-300 transition-colors">
+            <p className="mt-1.5 text-xs font-medium text-foreground/70 line-clamp-2 group-hover:text-violet-300 transition-colors">
               {anime.title}
             </p>
           </Link>
         ))}
-      </div>
+      </HorizontalScroll>
     </div>
   );
 }

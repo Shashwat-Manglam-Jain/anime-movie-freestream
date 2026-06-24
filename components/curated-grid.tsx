@@ -86,7 +86,7 @@ export function CuratedGrid({ items, type, perPage = 24 }: CuratedGridProps) {
     <div className="space-y-6">
       {/* Sort tabs */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex gap-1 rounded-xl bg-white/5 p-1">
+        <div className="flex gap-1 rounded-xl bg-black/5 dark:bg-white/5 p-1">
           {FILTERS.map((f) => (
             <button
               key={f.key}
@@ -94,7 +94,7 @@ export function CuratedGrid({ items, type, perPage = 24 }: CuratedGridProps) {
               className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all ${
                 sort === f.key
                   ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
               }`}
             >
               {f.label}
@@ -105,7 +105,7 @@ export function CuratedGrid({ items, type, perPage = 24 }: CuratedGridProps) {
         <select
           value={genre}
           onChange={(e) => setGenre(e.target.value)}
-          className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs text-zinc-300 outline-none focus:ring-1 focus:ring-violet-500"
+          className="rounded-lg bg-black/5 dark:bg-white/5 border border-border px-3 py-1.5 text-xs text-foreground/70 outline-none focus:ring-1 focus:ring-violet-500"
         >
           <option value="all">All Genres</option>
           {allGenres.map((g) => (
@@ -115,14 +115,14 @@ export function CuratedGrid({ items, type, perPage = 24 }: CuratedGridProps) {
           ))}
         </select>
 
-        <span className="ml-auto text-xs text-zinc-600">
+        <span className="ml-auto text-xs text-muted-foreground/70">
           {sorted.length} title{sorted.length !== 1 ? "s" : ""}
         </span>
       </div>
 
       {/* Grid */}
       {visible.length === 0 ? (
-        <div className="py-20 text-center text-zinc-500">
+        <div className="py-20 text-center text-muted-foreground">
           No titles match this filter.
         </div>
       ) : (
@@ -145,7 +145,7 @@ export function CuratedGrid({ items, type, perPage = 24 }: CuratedGridProps) {
       {/* Infinite scroll trigger */}
       {hasMore && (
         <div ref={loaderRef} className="flex justify-center py-8">
-          <div className="flex items-center gap-2 text-sm text-zinc-500">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -156,7 +156,7 @@ export function CuratedGrid({ items, type, perPage = 24 }: CuratedGridProps) {
       )}
 
       {!hasMore && sorted.length > perPage && (
-        <p className="text-center text-xs text-zinc-600 py-4">
+        <p className="text-center text-xs text-muted-foreground/70 py-4">
           You&apos;ve seen all {sorted.length} titles
         </p>
       )}

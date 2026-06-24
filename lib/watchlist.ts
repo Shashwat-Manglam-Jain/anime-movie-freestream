@@ -1,6 +1,8 @@
+export type ContentType = "anime" | "movie" | "tv" | "manga" | "novel" | "comic";
+
 export interface WatchlistItem {
   id: string;
-  type: "anime" | "movie" | "tv";
+  type: ContentType;
   title: string;
   poster: string;
   addedAt: number;
@@ -8,7 +10,7 @@ export interface WatchlistItem {
 
 export interface ContinueWatchingItem {
   id: string;
-  type: "anime" | "movie" | "tv";
+  type: ContentType;
   title: string;
   poster: string;
   watchUrl: string;

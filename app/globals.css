@@ -49,6 +49,41 @@
 }
 
 :root {
+  --background: oklch(0.98 0.005 270);
+  --foreground: oklch(0.15 0.01 270);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.01 270);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.01 270);
+  --primary: oklch(0.55 0.2 280);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.94 0.01 270);
+  --secondary-foreground: oklch(0.2 0.01 270);
+  --muted: oklch(0.94 0.01 270);
+  --muted-foreground: oklch(0.45 0.01 270);
+  --accent: oklch(0.94 0.01 270);
+  --accent-foreground: oklch(0.2 0.01 270);
+  --destructive: oklch(0.55 0.2 25);
+  --border: oklch(0 0 0 / 10%);
+  --input: oklch(0 0 0 / 8%);
+  --ring: oklch(0.55 0.2 280);
+  --chart-1: oklch(0.55 0.2 280);
+  --chart-2: oklch(0.55 0.2 320);
+  --chart-3: oklch(0.55 0.15 200);
+  --chart-4: oklch(0.55 0.15 150);
+  --chart-5: oklch(0.55 0.2 30);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.97 0.005 270);
+  --sidebar-foreground: oklch(0.15 0.01 270);
+  --sidebar-primary: oklch(0.55 0.2 280);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0.01 270);
+  --sidebar-accent-foreground: oklch(0.2 0.01 270);
+  --sidebar-border: oklch(0 0 0 / 10%);
+  --sidebar-ring: oklch(0.55 0.2 280);
+}
+
+.dark {
   --background: oklch(0.07 0.01 270);
   --foreground: oklch(0.95 0 0);
   --card: oklch(0.12 0.01 270);
@@ -72,7 +107,6 @@
   --chart-3: oklch(0.65 0.15 200);
   --chart-4: oklch(0.65 0.15 150);
   --chart-5: oklch(0.65 0.2 30);
-  --radius: 0.625rem;
   --sidebar: oklch(0.1 0.01 270);
   --sidebar-foreground: oklch(0.95 0 0);
   --sidebar-primary: oklch(0.65 0.2 280);
@@ -97,13 +131,16 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: light;
+}
+html.dark {
   color-scheme: dark;
 }
 
 select,
 select option {
-  background-color: oklch(0.15 0.01 270);
-  color: oklch(0.85 0 0);
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 .scrollbar-hide {
@@ -131,9 +168,15 @@ select option {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.3 0 0);
+  background: oklch(0.7 0 0);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0 0);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.3 0 0);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.4 0 0);
 }

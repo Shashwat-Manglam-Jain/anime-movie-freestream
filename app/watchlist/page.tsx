@@ -39,18 +39,18 @@ export default function WatchlistPage() {
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">My Library</h1>
-        <p className="mt-1 text-zinc-500">
+        <p className="mt-1 text-muted-foreground">
           Your saved anime, movies, and watch history
         </p>
       </div>
 
-      <div className="flex gap-1 rounded-xl bg-white/5 p-1 w-fit mb-8">
+      <div className="flex gap-1 rounded-xl bg-black/5 dark:bg-white/5 p-1 w-fit mb-8">
         <button
           onClick={() => setTab("watchlist")}
           className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
             tab === "watchlist"
               ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-              : "text-zinc-400 hover:text-white hover:bg-white/5"
+              : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
           }`}
         >
           Watchlist ({watchlist.length})
@@ -60,7 +60,7 @@ export default function WatchlistPage() {
           className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
             tab === "history"
               ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-              : "text-zinc-400 hover:text-white hover:bg-white/5"
+              : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
           }`}
         >
           Continue Watching ({continueItems.length})
@@ -69,12 +69,12 @@ export default function WatchlistPage() {
 
       {items.length === 0 ? (
         <div className="text-center py-20">
-          <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-white/5 mb-4">
-            <svg className="h-8 w-8 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 mb-4">
+            <svg className="h-8 w-8 text-muted-foreground/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
           </div>
-          <p className="text-zinc-500">
+          <p className="text-muted-foreground">
             {tab === "watchlist"
               ? "Your watchlist is empty. Add anime or movies to get started."
               : "No watch history yet. Start watching something!"}
@@ -95,7 +95,7 @@ export default function WatchlistPage() {
             return (
               <div key={item.id} className="group relative">
                 <Link href={href} className="block">
-                  <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-900 ring-1 ring-white/5 transition-all group-hover:ring-violet-500/40">
+                  <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-muted ring-1 ring-black/5 dark:ring-white/5 transition-all group-hover:ring-violet-500/40">
                     {item.poster ? (
                       <Image
                         src={item.poster}

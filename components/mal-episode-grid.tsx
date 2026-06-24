@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const EPS_PER_SEASON = 25;
+function getEpsPerSeason(total: number): number {
+  if (total > 500) return 100;
+  if (total > 200) return 50;
+  return 25;
+}
 
 interface MalEpisodeGridProps {
   malId: string;
@@ -18,13 +22,14 @@ export function MalEpisodeGrid({
   currentEpisode,
   lang,
 }: MalEpisodeGridProps) {
-  const totalSeasons = Math.ceil(totalEpisodes / EPS_PER_SEASON);
-  const currentSeason = Math.ceil(currentEpisode / EPS_PER_SEASON);
+  const epsPerSeason = getEpsPerSeason(totalEpisodes);
+  const totalSeasons = Math.ceil(totalEpisodes / epsPerSeason);
+  const currentSeason = Math.max(1, Math.ceil(currentEpisode / epsPerSeason));
   const [season, setSeason] = useState(currentSeason);
   const [jumpEp, setJumpEp] = useState("");
 
-  const seasonStart = (season - 1) * EPS_PER_SEASON + 1;
-  const seasonEnd = Math.min(season * EPS_PER_SEASON, totalEpisodes);
+  const seasonStart = (season - 1) * epsPerSeason + 1;
+  const seasonEnd = Math.min(season * epsPerSeason, totalEpisodes);
 
   const episodes = Array.from(
     { length: seasonEnd - seasonStart + 1 },
@@ -32,10 +37,10 @@ export function MalEpisodeGrid({
   );
 
   return (
-    <div className="space-y-4 pt-4 border-t border-white/5">
+    <div className="space-y-4 pt-4 border-t border-border">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-bold">Episodes</h3>
-        <span className="text-xs text-zinc-600">
+        <span className="text-xs text-muted-foreground/70">
           {totalEpisodes} episodes · {totalSeasons} season{totalSeasons !== 1 ? "s" : ""}
         </span>
       </div>
@@ -43,13 +48,13 @@ export function MalEpisodeGrid({
       {/* Season tabs */}
       {totalSeasons > 1 && (
         <div className="space-y-2">
-          <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">
+          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
             Season
           </span>
           <div className="flex gap-1.5 flex-wrap">
             {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((s) => {
-              const sStart = (s - 1) * EPS_PER_SEASON + 1;
-              const sEnd = Math.min(s * EPS_PER_SEASON, totalEpisodes);
+              const sStart = (s - 1) * epsPerSeason + 1;
+              const sEnd = Math.min(s * epsPerSeason, totalEpisodes);
               return (
                 <button
                   key={s}
@@ -57,7 +62,7 @@ export function MalEpisodeGrid({
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                     season === s
                       ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-                      : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+                      : "bg-black/5 dark:bg-white/5 text-muted-foreground hover:bg-black/10 dark:hover:bg-white/10 hover:text-foreground"
                   }`}
                   title={`Episodes ${sStart}–${sEnd}`}
                 >
@@ -83,7 +88,7 @@ export function MalEpisodeGrid({
               className={`flex items-center justify-center rounded-lg h-10 text-sm font-medium transition-all ${
                 isActive
                   ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20 ring-2 ring-violet-400/50"
-                  : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+                  : "bg-black/5 dark:bg-white/5 text-muted-foreground hover:bg-black/10 dark:hover:bg-white/10 hover:text-foreground"
               }`}
             >
               {ep}
@@ -93,9 +98,9 @@ export function MalEpisodeGrid({
       </div>
 
       {/* Jump to episode */}
-      {totalEpisodes > EPS_PER_SEASON && (
+      {totalEpisodes > epsPerSeason && (
         <div className="flex items-center gap-2 pt-2">
-          <span className="text-xs text-zinc-500">Go to episode:</span>
+          <span className="text-xs text-muted-foreground">Go to episode:</span>
           <input
             type="number"
             min={1}
@@ -111,7 +116,7 @@ export function MalEpisodeGrid({
               }
             }}
             placeholder={`1–${totalEpisodes}`}
-            className="w-24 rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-violet-500/50"
+            className="w-24 rounded-lg bg-black/5 dark:bg-white/5 border border-border px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-violet-500/50"
           />
           <Link
             href={
@@ -122,7 +127,7 @@ export function MalEpisodeGrid({
             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
               Number(jumpEp) >= 1 && Number(jumpEp) <= totalEpisodes
                 ? "bg-violet-600 text-white hover:bg-violet-500"
-                : "bg-white/5 text-zinc-600 cursor-not-allowed"
+                : "bg-black/5 dark:bg-white/5 text-muted-foreground/70 cursor-not-allowed"
             }`}
             onClick={(e) => {
               const ep = Number(jumpEp);

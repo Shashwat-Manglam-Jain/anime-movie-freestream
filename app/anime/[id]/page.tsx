@@ -1,8 +1,12 @@
 import Image from "next/image";
 import { getSeries } from "@/lib/anikoto";
+import { getAnimeRelations, getAnimeEpisodeCount, getAnimeSeasonChain } from "@/lib/jikan";
+import type { SeasonEntry } from "@/lib/jikan";
 import { Badge } from "@/components/ui/badge";
 import { EpisodeList } from "@/components/episode-list";
+import { MalEpisodeGrid } from "@/components/mal-episode-grid";
 import { WatchlistButton } from "@/components/watchlist-button";
+import { AnimeRelations } from "@/components/anime-relations";
 
 export default async function AnimeDetailPage({
   params,
@@ -12,6 +16,22 @@ export default async function AnimeDetailPage({
   const { id } = await params;
   const { data } = await getSeries(Number(id));
   const { anime, episodes } = data;
+
+  let relations: Awaited<ReturnType<typeof getAnimeRelations>> = [];
+  let jikanEpCount = 0;
+  let seasonChain: SeasonEntry[] = [];
+  if (anime.mal_id) {
+    const [relResult, epCountResult, seasonChainResult] = await Promise.allSettled([
+      getAnimeRelations(Number(anime.mal_id)),
+      getAnimeEpisodeCount(Number(anime.mal_id)),
+      getAnimeSeasonChain(Number(anime.mal_id)),
+    ]);
+    if (relResult.status === "fulfilled") relations = relResult.value;
+    if (epCountResult.status === "fulfilled") jikanEpCount = epCountResult.value;
+    if (seasonChainResult.status === "fulfilled") seasonChain = seasonChainResult.value;
+  }
+
+  const showMalGrid = anime.mal_id && jikanEpCount > episodes.length + 10;
 
   return (
     <div>
@@ -33,7 +53,7 @@ export default async function AnimeDetailPage({
       <div className="mx-auto max-w-7xl px-4 pb-16">
         <div className="flex flex-col md:flex-row gap-6 -mt-36 relative z-10">
           <div className="shrink-0">
-            <div className="relative w-44 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+            <div className="relative w-44 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
               <Image
                 src={anime.poster}
                 alt={anime.title}
@@ -51,7 +71,7 @@ export default async function AnimeDetailPage({
                 {anime.title}
               </h1>
               {anime.alternative && anime.alternative !== anime.title && (
-                <p className="text-sm text-zinc-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {anime.alternative}
                 </p>
               )}
@@ -63,21 +83,21 @@ export default async function AnimeDetailPage({
                   ★ {anime.score}
                 </Badge>
               )}
-              <Badge variant="outline" className="border-white/10">
+              <Badge variant="outline" className="border-border">
                 {anime.status}
               </Badge>
               {anime.year > 0 && (
-                <Badge variant="outline" className="border-white/10">
+                <Badge variant="outline" className="border-border">
                   {anime.year}
                 </Badge>
               )}
               {anime.rating && (
-                <Badge variant="outline" className="border-white/10">
+                <Badge variant="outline" className="border-border">
                   {anime.rating}
                 </Badge>
               )}
               {anime.duration && (
-                <Badge variant="outline" className="border-white/10">
+                <Badge variant="outline" className="border-border">
                   {anime.duration} min
                 </Badge>
               )}
@@ -101,7 +121,7 @@ export default async function AnimeDetailPage({
                 <Badge
                   key={genre}
                   variant="secondary"
-                  className="bg-white/5 text-zinc-300 text-xs"
+                  className="bg-black/5 dark:bg-white/5 text-foreground/70 text-xs"
                 >
                   {genre}
                 </Badge>
@@ -110,8 +130,8 @@ export default async function AnimeDetailPage({
 
             {anime.terms_by_type?.studios &&
               anime.terms_by_type.studios.length > 0 && (
-                <p className="text-sm text-zinc-500">
-                  <span className="text-zinc-400">Studio:</span>{" "}
+                <p className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground">Studio:</span>{" "}
                   {anime.terms_by_type.studios.join(", ")}
                 </p>
               )}
@@ -127,16 +147,33 @@ export default async function AnimeDetailPage({
             />
 
             {anime.description && (
-              <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
                 {anime.description}
               </p>
             )}
           </div>
         </div>
 
-        <div className="mt-12">
-          <EpisodeList episodes={episodes} animeId={anime.id} />
-        </div>
+        {relations.length > 0 && anime.mal_id && (
+          <div className="mt-8">
+            <AnimeRelations relations={relations} currentMalId={Number(anime.mal_id)} seasonChain={seasonChain} />
+          </div>
+        )}
+
+        {showMalGrid ? (
+          <div className="mt-12">
+            <MalEpisodeGrid
+              malId={anime.mal_id}
+              totalEpisodes={jikanEpCount}
+              currentEpisode={0}
+              lang="sub"
+            />
+          </div>
+        ) : (
+          <div className="mt-12">
+            <EpisodeList episodes={episodes} animeId={anime.id} />
+          </div>
+        )}
       </div>
     </div>
   );

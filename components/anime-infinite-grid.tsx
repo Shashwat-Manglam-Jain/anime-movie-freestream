@@ -96,7 +96,7 @@ export function AnimeInfiniteGrid({
       {hasMore && (
         <div ref={sentinelRef} className="flex justify-center py-10">
           {loading && (
-            <div className="flex items-center gap-2 text-zinc-500 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <svg
                 className="h-5 w-5 animate-spin"
                 fill="none"
@@ -123,7 +123,7 @@ export function AnimeInfiniteGrid({
       )}
 
       {!hasMore && items.length > 24 && (
-        <p className="text-center text-sm text-zinc-600 py-6">
+        <p className="text-center text-sm text-muted-foreground/70 py-6">
           You&apos;ve reached the end
         </p>
       )}

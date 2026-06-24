@@ -30,7 +30,7 @@ export default function SettingsPage() {
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="mt-2 text-zinc-500">
+        <p className="mt-2 text-muted-foreground">
           Manage streaming providers and app preferences
         </p>
       </div>
@@ -40,12 +40,12 @@ export default function SettingsPage() {
           <h2 className="text-xl font-bold">Streaming Providers</h2>
           <button
             onClick={resetAll}
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="text-xs text-muted-foreground hover:text-foreground/70 transition-colors"
           >
             Reset to defaults
           </button>
         </div>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-muted-foreground">
           Enable or disable streaming providers. Enabled providers appear as
           server options on watch pages. Changes are saved to your browser.
         </p>
@@ -59,8 +59,8 @@ export default function SettingsPage() {
                 key={provider.id}
                 className={`rounded-xl border p-5 transition-all ${
                   isEnabled
-                    ? "bg-white/[0.03] border-violet-500/20"
-                    : "bg-white/[0.01] border-white/5 opacity-60"
+                    ? "bg-black/[0.03] dark:bg-white/[0.03] border-violet-500/20"
+                    : "bg-black/[0.01] dark:bg-white/[0.01] border-border opacity-60"
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -71,7 +71,7 @@ export default function SettingsPage() {
                         {provider.types.map((type) => (
                           <span
                             key={type}
-                            className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-zinc-400 uppercase"
+                            className="rounded bg-black/5 dark:bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground uppercase"
                           >
                             {type}
                           </span>
@@ -87,7 +87,7 @@ export default function SettingsPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-zinc-500">{provider.notes}</p>
+                    <p className="text-sm text-muted-foreground">{provider.notes}</p>
                     <a
                       href={provider.url}
                       target="_blank"
@@ -101,7 +101,7 @@ export default function SettingsPage() {
                   <button
                     onClick={() => toggleProvider(provider.id)}
                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${
-                      isEnabled ? "bg-violet-600" : "bg-zinc-700"
+                      isEnabled ? "bg-violet-600" : "bg-muted-foreground/30"
                     }`}
                   >
                     <span
@@ -119,20 +119,20 @@ export default function SettingsPage() {
 
       <section className="mt-12 space-y-4">
         <h2 className="text-xl font-bold">How to Add a Provider</h2>
-        <div className="rounded-xl bg-white/[0.03] border border-white/5 p-6 text-sm text-zinc-400 space-y-3">
+        <div className="rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-border p-6 text-sm text-muted-foreground space-y-3">
           <p>
             To add a new streaming provider to smjStreamz, edit{" "}
-            <code className="rounded bg-white/5 px-1.5 py-0.5 text-violet-400">
+            <code className="rounded bg-black/5 dark:bg-white/5 px-1.5 py-0.5 text-violet-400">
               lib/providers.ts
             </code>{" "}
             and add a new entry to the{" "}
-            <code className="rounded bg-white/5 px-1.5 py-0.5 text-violet-400">
+            <code className="rounded bg-black/5 dark:bg-white/5 px-1.5 py-0.5 text-violet-400">
               ALL_PROVIDERS
             </code>{" "}
             array.
           </p>
           <p>Each provider needs:</p>
-          <ul className="ml-5 list-disc space-y-1 text-zinc-500">
+          <ul className="ml-5 list-disc space-y-1 text-muted-foreground">
             <li>
               <code className="text-violet-400/70">id</code> — Unique identifier
             </li>

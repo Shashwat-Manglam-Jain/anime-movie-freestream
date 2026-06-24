@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { PosterImage } from "@/components/poster-image";
+import { HorizontalScroll } from "@/components/horizontal-scroll";
 
 interface SimilarItem {
   title: string;
@@ -32,16 +33,16 @@ export function SimilarMovies({
     hrefPrefix || (similar[0]?.seasons != null ? "/tv-show" : "/movie");
 
   return (
-    <div className="space-y-3 pt-4 border-t border-white/5">
+    <div className="space-y-3 pt-4 border-t border-border">
       <h3 className="text-lg font-bold">{title}</h3>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      <HorizontalScroll>
         {similar.slice(0, 12).map((movie) => (
           <Link
             key={movie.tmdbId}
             href={`${prefix}/${movie.tmdbId}`}
             className="shrink-0 group w-[120px]"
           >
-            <div className="relative aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-white/5 group-hover:ring-violet-500/40 transition-all">
+            <div className="relative aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-black/5 dark:ring-white/5 group-hover:ring-violet-500/40 transition-all">
               <PosterImage
                 src={movie.poster}
                 alt={movie.title}
@@ -68,14 +69,14 @@ export function SimilarMovies({
               )}
             </div>
             <div className="mt-1.5 space-y-0.5">
-              <p className="text-xs font-medium text-zinc-300 line-clamp-2 group-hover:text-violet-300 transition-colors">
+              <p className="text-xs font-medium text-foreground/70 line-clamp-2 group-hover:text-violet-300 transition-colors">
                 {movie.title}
               </p>
-              <p className="text-[10px] text-zinc-600">{movie.year}</p>
+              <p className="text-[10px] text-muted-foreground/70">{movie.year}</p>
             </div>
           </Link>
         ))}
-      </div>
+      </HorizontalScroll>
     </div>
   );
 }

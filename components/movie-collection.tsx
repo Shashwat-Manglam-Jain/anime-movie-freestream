@@ -11,7 +11,7 @@ interface MovieCollectionProps {
 
 export function MovieCollection({ collection, currentTmdbId }: MovieCollectionProps) {
   return (
-    <div className="space-y-3 pt-4 border-t border-white/5">
+    <div className="space-y-3 pt-4 border-t border-border">
       <h3 className="text-lg font-bold flex items-center gap-2">
         <svg className="h-4 w-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
@@ -30,7 +30,7 @@ export function MovieCollection({ collection, currentTmdbId }: MovieCollectionPr
               <div className={`relative aspect-[2/3] rounded-lg overflow-hidden transition-all ${
                 isCurrent
                   ? "ring-2 ring-violet-500 shadow-lg shadow-violet-500/20"
-                  : "ring-1 ring-white/5 group-hover:ring-violet-500/40"
+                  : "ring-1 ring-black/5 dark:ring-white/5 group-hover:ring-violet-500/40"
               }`}>
                 <PosterImage
                   src={movie.poster}
@@ -58,11 +58,11 @@ export function MovieCollection({ collection, currentTmdbId }: MovieCollectionPr
               </div>
               <div className="mt-1.5 space-y-0.5">
                 <p className={`text-xs font-medium line-clamp-2 transition-colors ${
-                  isCurrent ? "text-violet-400" : "text-zinc-300 group-hover:text-violet-300"
+                  isCurrent ? "text-violet-400" : "text-foreground/70 group-hover:text-violet-300"
                 }`}>
                   {movie.title}
                 </p>
-                <p className="text-[10px] text-zinc-600">{movie.year}</p>
+                <p className="text-[10px] text-muted-foreground/70">{movie.year}</p>
               </div>
             </Link>
           );

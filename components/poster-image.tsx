@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Image from "next/image";
+import { useState, useMemo, useEffect } from "react";
 
 interface PosterImageProps {
   src: string;
@@ -38,14 +37,19 @@ export function PosterImage({
   const [fallbackIndex, setFallbackIndex] = useState(-1);
   const [failed, setFailed] = useState(false);
 
+  useEffect(() => {
+    setFallbackIndex(-1);
+    setFailed(false);
+  }, [src]);
+
   const currentSrc =
     fallbackIndex === -1 ? src : fallbacks[fallbackIndex] ?? null;
 
   if (failed || !currentSrc) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center bg-zinc-800/50">
+      <div className="absolute inset-0 flex items-center justify-center bg-muted">
         <svg
-          className="h-10 w-10 text-zinc-700"
+          className="h-10 w-10 text-muted-foreground/50"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -61,14 +65,18 @@ export function PosterImage({
     );
   }
 
+  const imgStyle: React.CSSProperties = fill
+    ? { position: "absolute", height: "100%", width: "100%", inset: 0 }
+    : {};
+
   return (
-    <Image
+    <img
       src={currentSrc}
       alt={alt}
-      fill={fill}
-      sizes={sizes}
       className={className}
-      priority={priority}
+      style={imgStyle}
+      loading={priority ? "eager" : "lazy"}
+      referrerPolicy="no-referrer"
       onError={() => {
         const nextIndex = fallbackIndex + 1;
         if (nextIndex < fallbacks.length) {
@@ -77,7 +85,6 @@ export function PosterImage({
           setFailed(true);
         }
       }}
-      unoptimized
     />
   );
 }

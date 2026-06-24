@@ -15,10 +15,15 @@ export interface StreamProvider {
     episode: number,
     lang: "sub" | "dub"
   ) => string;
+  buildAnimeAnilistUrl?: (
+    anilistId: string,
+    episode: number,
+    lang: "sub" | "dub"
+  ) => string;
 }
 
 export const ALL_PROVIDERS: StreamProvider[] = [
-  // ── Anime Providers ──
+  // ── Anime Embed Providers (fallback order: 1→2→3→4) ──
   {
     id: "megaplay",
     name: "MegaPlay",
@@ -26,27 +31,60 @@ export const ALL_PROVIDERS: StreamProvider[] = [
     types: ["anime"],
     free: true,
     requiresKey: false,
-    notes: "Primary anime server — sub/dub, large library. Uses HiAnime/Anikoto sources.",
+    notes: "Primary anime server — sub/dub, large library.",
     enabled: true,
     buildAnimeEmbedUrl: (embedId, lang) =>
       `https://megaplay.buzz/stream/s-2/${embedId}/${lang}`,
     buildAnimeMalUrl: (malId, episode, lang) =>
       `https://megaplay.buzz/stream/mal/${malId}/${episode}/${lang}`,
+    buildAnimeAnilistUrl: (anilistId, episode, lang) =>
+      `https://megaplay.buzz/stream/ani/${anilistId}/${episode}/${lang}`,
   },
   {
-    id: "animeplay",
+    id: "animplay",
     name: "AnimPlay",
     url: "https://animeplay.cfd",
     types: ["anime"],
     free: true,
     requiresKey: false,
-    notes: "Mirror of MegaPlay on a different domain — works when MegaPlay is down.",
+    notes: "MegaPlay mirror domain — same sources, alternate CDN.",
     enabled: true,
     buildAnimeEmbedUrl: (embedId, lang) =>
       `https://animeplay.cfd/stream/s-2/${embedId}/${lang}`,
     buildAnimeMalUrl: (malId, episode, lang) =>
       `https://animeplay.cfd/stream/mal/${malId}/${episode}/${lang}`,
+    buildAnimeAnilistUrl: (anilistId, episode, lang) =>
+      `https://animeplay.cfd/stream/ani/${anilistId}/${episode}/${lang}`,
   },
+  {
+    id: "megaplay2",
+    name: "MegaPlay S1",
+    url: "https://megaplay.buzz",
+    types: ["anime"],
+    free: true,
+    requiresKey: false,
+    notes: "MegaPlay alternate embed format (s-1).",
+    enabled: true,
+    buildAnimeEmbedUrl: (embedId, lang) =>
+      `https://megaplay.buzz/stream/s-1/${embedId}/${lang}`,
+    buildAnimeMalUrl: (malId, episode, lang) =>
+      `https://megaplay.buzz/stream/mal/${malId}/${episode}/${lang}`,
+    buildAnimeAnilistUrl: (anilistId, episode, lang) =>
+      `https://megaplay.buzz/stream/ani/${anilistId}/${episode}/${lang}`,
+  },
+  {
+    id: "videasy-anime",
+    name: "Videasy",
+    url: "https://player.videasy.to",
+    types: ["anime"],
+    free: true,
+    requiresKey: false,
+    notes: "Videasy anime player — supports MAL ID lookup.",
+    enabled: true,
+    buildAnimeMalUrl: (malId, episode, lang) =>
+      `https://player.videasy.to/anime/mal/${malId}/${episode}/${lang}`,
+  },
+  // ── Movie & TV Providers ──
   {
     id: "videasy",
     name: "Videasy",
@@ -54,7 +92,7 @@ export const ALL_PROVIDERS: StreamProvider[] = [
     types: ["movie", "tv"],
     free: true,
     requiresKey: false,
-    notes: "Clean player with auto quality and language detection. Supports movies and TV.",
+    notes: "Clean player with auto quality and language detection.",
     enabled: true,
     buildMovieUrl: (tmdbId) =>
       `https://player.videasy.to/movie/${tmdbId}`,
@@ -68,14 +106,13 @@ export const ALL_PROVIDERS: StreamProvider[] = [
     types: ["movie", "tv"],
     free: true,
     requiresKey: false,
-    notes: "Multi-source player with built-in quality selector and subtitles. Supports movies and TV.",
+    notes: "Multi-source player with built-in quality selector and subtitles.",
     enabled: true,
     buildMovieUrl: (tmdbId) =>
       `https://vidsrc.pm/embed/movie/${tmdbId}`,
     buildTvUrl: (tmdbId, season, episode) =>
       `https://vidsrc.pm/embed/tv/${tmdbId}/${season}/${episode}`,
   },
-  // ── Movie & TV Only ──
   {
     id: "vidlink",
     name: "VidLink Pro",
@@ -83,7 +120,7 @@ export const ALL_PROVIDERS: StreamProvider[] = [
     types: ["movie", "tv"],
     free: true,
     requiresKey: false,
-    notes: "Fast HD embeds with minimal ads. Supports movies and TV up to 4K.",
+    notes: "Fast HD embeds with minimal ads.",
     enabled: true,
     buildMovieUrl: (tmdbId) =>
       `https://vidlink.pro/movie/${tmdbId}`,
@@ -97,7 +134,7 @@ export const ALL_PROVIDERS: StreamProvider[] = [
     types: ["movie", "tv"],
     free: true,
     requiresKey: false,
-    notes: "Aggregates multiple video sources (Vidcloud, Vidstream) into one player.",
+    notes: "Aggregates multiple video sources into one player.",
     enabled: true,
     buildMovieUrl: (tmdbId) =>
       `https://autoembed.co/movie/tmdb/${tmdbId}`,

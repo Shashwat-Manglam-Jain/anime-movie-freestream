@@ -5,23 +5,80 @@ import { FeaturedCarousel, type FeaturedItem } from "@/components/featured-carou
 import { ContentCard } from "@/components/content-card";
 import { ContentRow } from "@/components/content-row";
 import { ContinueWatching } from "@/components/continue-watching";
+import { HomeReadingRows } from "@/components/home-reading-rows";
 
+const TMDB_BASE = "https://api.themoviedb.org/3";
 const IMG_ORIGINAL = "https://image.tmdb.org/t/p/original";
 
-export default async function HomePage() {
-  let recentAnime;
-  try {
-    recentAnime = await getRecentAnime(1, 12);
-  } catch {
-    recentAnime = { data: [] };
+async function fetchWithRetry(url: string, retries = 2): Promise<Response> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok || i === retries) return res;
+    } catch (e) {
+      if (i === retries) throw e;
+    }
   }
+  throw new Error("fetch failed");
+}
 
-  let topAnime;
+async function getTmdbTrending(type: "movie" | "tv", page = 1): Promise<FeaturedItem[]> {
+  const key = process.env.TMDB_API_KEY;
+  if (!key) return [];
   try {
-    topAnime = await getTopAnime(1, 12);
+    const res = await fetchWithRetry(`${TMDB_BASE}/trending/${type}/week?api_key=${key}&page=${page}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || []).slice(0, 10).map((item: any) => ({
+      title: type === "tv" ? (item.name || item.original_name) : (item.title || item.original_title),
+      year: type === "tv"
+        ? (item.first_air_date ? new Date(item.first_air_date).getFullYear() : 0)
+        : (item.release_date ? new Date(item.release_date).getFullYear() : 0),
+      rating: item.vote_average ? item.vote_average.toFixed(1) : "N/A",
+      genre: "",
+      poster: item.backdrop_path ? `${IMG_ORIGINAL}${item.backdrop_path}` : (item.poster_path ? `${IMG_ORIGINAL}${item.poster_path}` : ""),
+      href: type === "movie" ? `/movie/${item.id}` : `/tv-show/${item.id}`,
+      type: type as "movie" | "tv",
+    })).filter((item: FeaturedItem) => item.poster);
   } catch {
-    topAnime = { data: [] };
+    return [];
   }
+}
+
+async function getTmdbPopular(type: "movie" | "tv"): Promise<{ id: number; title: string; poster: string; rating: string; year: number }[]> {
+  const key = process.env.TMDB_API_KEY;
+  if (!key) return [];
+  try {
+    const res = await fetchWithRetry(`${TMDB_BASE}/${type}/popular?api_key=${key}&page=1`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || []).map((item: any) => ({
+      id: item.id,
+      title: type === "tv" ? (item.name || item.original_name) : (item.title || item.original_title),
+      poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "",
+      rating: item.vote_average ? item.vote_average.toFixed(1) : "0",
+      year: type === "tv"
+        ? (item.first_air_date ? new Date(item.first_air_date).getFullYear() : 0)
+        : (item.release_date ? new Date(item.release_date).getFullYear() : 0),
+    })).filter((item: any) => item.poster);
+  } catch {
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const [recentAnimeResult, topAnimeResult, trendingMoviesResult, trendingTVResult, popularMoviesResult, popularTVResult] =
+    await Promise.allSettled([
+      getRecentAnime(1, 12),
+      getTopAnime(1, 12),
+      getTmdbTrending("movie"),
+      getTmdbTrending("tv"),
+      getTmdbPopular("movie"),
+      getTmdbPopular("tv"),
+    ]);
+
+  const recentAnime = recentAnimeResult.status === "fulfilled" ? recentAnimeResult.value : { data: [] };
+  const topAnime = topAnimeResult.status === "fulfilled" ? topAnimeResult.value : { data: [] };
 
   const featured: FeaturedItem[] = [];
 
@@ -39,37 +96,30 @@ export default async function HomePage() {
     }
   }
 
-  const recentMovies = [...TOP_MOVIES]
-    .sort((a, b) => b.year - a.year)
-    .slice(0, 2);
-  for (const m of recentMovies) {
-    const posterPath = m.poster.split("/w500/")[1];
-    featured.push({
-      title: m.title,
-      year: m.year,
-      rating: m.rating,
-      genre: m.genre,
-      poster: posterPath ? `${IMG_ORIGINAL}/${posterPath}` : m.poster,
-      href: `/movie/${m.tmdbId}`,
-      type: "movie",
-    });
+  if (trendingMoviesResult.status === "fulfilled") featured.push(...trendingMoviesResult.value);
+  if (trendingTVResult.status === "fulfilled") featured.push(...trendingTVResult.value);
+
+  if (featured.length <= 3) {
+    for (const m of [...TOP_MOVIES].sort((a, b) => b.year - a.year).slice(0, 4)) {
+      const posterPath = m.poster.split("/w500/")[1];
+      featured.push({
+        title: m.title, year: m.year, rating: m.rating, genre: m.genre,
+        poster: posterPath ? `${IMG_ORIGINAL}/${posterPath}` : m.poster,
+        href: `/movie/${m.tmdbId}`, type: "movie",
+      });
+    }
   }
 
-  const recentTV = [...TOP_TV_SHOWS]
-    .sort((a, b) => b.year - a.year)
-    .slice(0, 2);
-  for (const s of recentTV) {
-    const posterPath = s.poster.split("/w500/")[1];
-    featured.push({
-      title: s.title,
-      year: s.year,
-      rating: s.rating,
-      genre: s.genre,
-      poster: posterPath ? `${IMG_ORIGINAL}/${posterPath}` : s.poster,
-      href: `/tv-show/${s.tmdbId}`,
-      type: "tv",
-    });
-  }
+  const popularMovies = popularMoviesResult.status === "fulfilled" ? popularMoviesResult.value : [];
+  const popularTV = popularTVResult.status === "fulfilled" ? popularTVResult.value : [];
+
+  const movieItems = popularMovies.length > 0
+    ? popularMovies
+    : TOP_MOVIES.map((m) => ({ id: m.tmdbId, title: m.title, poster: m.poster, rating: m.rating, year: m.year }));
+
+  const tvItems = popularTV.length > 0
+    ? popularTV
+    : TOP_TV_SHOWS.map((s) => ({ id: s.tmdbId, title: s.title, poster: s.poster, rating: s.rating, year: s.year }));
 
   return (
     <div>
@@ -115,32 +165,32 @@ export default async function HomePage() {
           </ContentRow>
         )}
 
-        <ContentRow title="Must Watch Movies" href="/movies">
-          {TOP_MOVIES.slice(0, 12).map((movie) => (
+        <HomeReadingRows />
+
+        <ContentRow title="Trending Movies" href="/movies">
+          {movieItems.slice(0, 18).map((movie) => (
             <ContentCard
-              key={movie.tmdbId}
+              key={movie.id}
               title={movie.title}
               poster={movie.poster}
               score={movie.rating}
               year={movie.year}
-              genres={movie.genre.split(", ")}
               type="Movie"
-              href={`/movie/${movie.tmdbId}`}
+              href={`/movie/${movie.id}`}
             />
           ))}
         </ContentRow>
 
         <ContentRow title="Popular TV Shows" href="/tv">
-          {TOP_TV_SHOWS.slice(0, 12).map((show) => (
+          {tvItems.slice(0, 18).map((show) => (
             <ContentCard
-              key={show.tmdbId}
+              key={show.id}
               title={show.title}
               poster={show.poster}
               score={show.rating}
               year={show.year}
-              genres={show.genre.split(", ")}
               type="TV"
-              href={`/tv-show/${show.tmdbId}`}
+              href={`/tv-show/${show.id}`}
             />
           ))}
         </ContentRow>

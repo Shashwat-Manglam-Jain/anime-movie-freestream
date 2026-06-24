@@ -29,7 +29,7 @@ export function ContentCard({
 
   return (
     <Link href={href} className="group block">
-      <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-zinc-900 ring-1 ring-white/5 transition-all duration-300 group-hover:ring-violet-500/40 group-hover:shadow-lg group-hover:shadow-violet-500/10">
+      <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-muted ring-1 ring-black/5 dark:ring-white/5 transition-all duration-300 group-hover:ring-violet-500/40 group-hover:shadow-lg group-hover:shadow-violet-500/10">
         <PosterImage
           src={poster}
           alt={title}

@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
+    "@consumet/extensions": "^1.8.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "got-scraping": "^4.2.1",
+    "hls.js": "^1.6.16",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
     "react": "19.2.4",

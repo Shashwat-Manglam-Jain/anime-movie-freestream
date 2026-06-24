@@ -38,7 +38,7 @@ export function WatchlistButton({ item }: WatchlistButtonProps) {
       className={
         saved
           ? "bg-violet-600 hover:bg-violet-500 text-white"
-          : "border-white/10 hover:bg-white/5"
+          : "border-border hover:bg-black/5 dark:hover:bg-white/5"
       }
     >
       {saved ? (

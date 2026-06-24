@@ -4,12 +4,16 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { useTheme } from "@/components/theme-provider";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/anime", label: "Anime" },
+  { href: "/manga", label: "Manga" },
   { href: "/movies", label: "Movies" },
   { href: "/tv", label: "TV Shows" },
+  { href: "/comics", label: "Comics" },
+  { href: "/light-novels", label: "Novels" },
   { href: "/watchlist", label: "Watchlist" },
 ];
 
@@ -18,6 +22,7 @@ export function Header() {
   const pathname = usePathname();
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -30,7 +35,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-black/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white font-black text-[10px]">
@@ -53,8 +58,8 @@ export function Header() {
                 href={link.href}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-white/10 text-white"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                    ? "bg-primary/10 text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                 }`}
               >
                 {link.label}
@@ -66,7 +71,7 @@ export function Header() {
         <form onSubmit={handleSearch} className="flex-1 max-w-xs ml-auto">
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500"
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -76,18 +81,33 @@ export function Header() {
             </svg>
             <Input
               type="search"
-              placeholder="Search anime, movies..."
+              placeholder="Search everything..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="h-9 pl-9 bg-white/5 border-white/10 text-sm placeholder:text-zinc-500 focus:bg-white/10 focus:border-violet-500/50"
+              className="h-9 pl-9 bg-black/5 dark:bg-white/5 border-border text-sm placeholder:text-muted-foreground focus:bg-black/10 dark:focus:bg-white/10 focus:border-violet-500/50"
             />
           </div>
         </form>
 
         <div className="flex items-center gap-1">
+          <button
+            onClick={toggleTheme}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? (
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+              </svg>
+            ) : (
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+              </svg>
+            )}
+          </button>
           <Link
             href="/settings"
-            className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             title="Settings"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -96,7 +116,7 @@ export function Header() {
             </svg>
           </Link>
           <button
-            className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/5"
+            className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -111,15 +131,15 @@ export function Header() {
       </div>
 
       {mobileMenuOpen && (
-        <nav className="md:hidden border-t border-white/5 bg-black/95 backdrop-blur-xl px-4 py-3 space-y-1">
+        <nav className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl px-4 py-3 space-y-1">
           {NAV_LINKS.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">
+              className="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
               {link.label}
             </Link>
           ))}
           <Link href="/settings" onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5">
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5">
             Settings
           </Link>
         </nav>
