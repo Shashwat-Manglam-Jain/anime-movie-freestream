@@ -263,12 +263,18 @@ export async function searchAllSources(
 function bestMatch(results: NovelBinResult[], query: string): NovelBinResult | null {
   if (results.length === 0) return null;
   const qNorm = query.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const qWords = query.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w.length > 1);
 
   return (
     results.find((r) => r.title.toLowerCase().replace(/[^a-z0-9]/g, "") === qNorm) ||
     results.find((r) => {
       const rNorm = r.title.toLowerCase().replace(/[^a-z0-9]/g, "");
       return rNorm.includes(qNorm) || qNorm.includes(rNorm);
+    }) ||
+    results.find((r) => {
+      const rLower = r.title.toLowerCase();
+      const matched = qWords.filter(w => rLower.includes(w));
+      return matched.length >= Math.ceil(qWords.length * 0.6);
     }) ||
     null
   );
@@ -278,15 +284,21 @@ export async function findNovelBinMatch(
   title: string,
   titleAlt?: string | null
 ): Promise<NovelBinResult | null> {
-  const results = await searchNovelBin(title);
-  const match = bestMatch(results, title);
-  if (match) return match;
+  const queries: string[] = [title];
+  if (titleAlt && titleAlt !== title) queries.push(titleAlt);
+  const beforeColon = title.split(/[:—–-]\s/)[0].trim();
+  if (beforeColon.length >= 4 && beforeColon !== title) queries.push(beforeColon);
+  const afterColon = title.split(/[:—–-]\s/).slice(1).join(" ").trim();
+  if (afterColon.length >= 4) queries.push(afterColon);
 
-  if (titleAlt) {
-    const altResults = await searchNovelBin(titleAlt);
-    const altMatch = bestMatch(altResults, titleAlt);
-    if (altMatch) return altMatch;
+  for (const q of queries) {
+    try {
+      const results = await searchNovelBin(q);
+      const match = bestMatch(results, title) || (titleAlt ? bestMatch(results, titleAlt) : null)
+        || bestMatch(results, q);
+      if (match) return match;
+    } catch {}
   }
 
-  return results[0] || null;
+  return null;
 }

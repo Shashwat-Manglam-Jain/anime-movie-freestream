@@ -659,20 +659,48 @@ async function nbReadChapter(chapterId: string) {
 // Combined functions — try NovelFire first, then fallbacks
 // ═══════════════════════════════════════════════════════════════════
 
-async function searchNovels(query: string) {
+async function tryAllSources(q: string): Promise<{ id: string; title: string; image?: string }[]> {
   try {
-    const results = await nfSearchNovels(query);
+    const results = await nfSearchNovels(q);
     if (results.length > 0) return results;
   } catch {}
   try {
-    const results = await fwnSearchNovels(query);
+    const results = await fwnSearchNovels(q);
     if (results.length > 0) return results;
   } catch {}
   try {
-    const results = await nbSearchNovels(query);
+    const results = await nbSearchNovels(q);
     if (results.length > 0) return results;
   } catch {}
   return [];
+}
+
+function hasRelevantResult(results: { title: string }[], query: string): boolean {
+  const words = query.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w.length > 2);
+  if (words.length === 0) return results.length > 0;
+  return results.some(r => {
+    const t = r.title.toLowerCase();
+    return words.filter(w => t.includes(w)).length >= Math.min(2, words.length);
+  });
+}
+
+async function searchNovels(query: string) {
+  const results = await tryAllSources(query);
+  if (hasRelevantResult(results, query)) return results;
+
+  const beforeColon = query.split(/[:—–]\s/)[0].trim();
+  if (beforeColon.length >= 4 && beforeColon !== query) {
+    const retry = await tryAllSources(beforeColon);
+    if (retry.length > 0) return retry;
+  }
+
+  const afterColon = query.split(/[:—–]\s/).slice(1).join(" ").trim();
+  if (afterColon.length >= 4) {
+    const retry = await tryAllSources(afterColon);
+    if (retry.length > 0) return retry;
+  }
+
+  return results;
 }
 
 async function getNovelInfo(slug: string) {
