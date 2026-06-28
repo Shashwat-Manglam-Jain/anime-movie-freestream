@@ -423,14 +423,33 @@ async function fwnReadChapter(chapterId: string) {
 
   const h4Match = html.match(/<h4>([^<]+)<\/h4>/);
 
-  const contentMatch = html.match(/class="txt[^"]*"[^>]*>([\s\S]*?)<\/div>/);
-  if (!contentMatch) {
+  let rawContent: string | null = null;
+  const txtIdx = html.indexOf('class="txt');
+  if (txtIdx !== -1) {
+    const startIdx = html.indexOf(">", txtIdx);
+    if (startIdx !== -1) {
+      let depth = 1;
+      let i = startIdx + 1;
+      while (i < html.length && depth > 0) {
+        if (html[i] === "<") {
+          if (html.substring(i, i + 4) === "<div") depth++;
+          else if (html.substring(i, i + 6) === "</div>") {
+            depth--;
+            if (depth === 0) { rawContent = html.substring(startIdx + 1, i); break; }
+          }
+        }
+        i++;
+      }
+    }
+  }
+  if (!rawContent) {
     return { title: "Chapter", content: "Content not available.", source: "freewebnovel" };
   }
 
-  let text = contentMatch[1];
+  let text = rawContent;
   text = text.replace(/<script[\s\S]*?<\/script>/gi, "");
-  text = text.replace(/<div[^>]*id="article"[^>]*>/gi, "");
+  text = text.replace(/<div[^>]*>/gi, "");
+  text = text.replace(/<\/div>/gi, "");
   text = text.replace(/<h4>[^<]*<\/h4>/gi, "");
 
   text = text.replace(/read\s+(?:the\s+)?latest\s+(?:chapter|chapters)\s+at\s+[\w.]+[.!]?/gi, "");
