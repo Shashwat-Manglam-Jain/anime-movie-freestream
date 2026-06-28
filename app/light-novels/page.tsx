@@ -111,8 +111,7 @@ export default function LightNovelsPage() {
   }
 
   function novelHref(novel: NormalizedNovel) {
-    if (novel.source === "novelbin") {
-      // id is already "novelbin/slug" for novelbin-only results
+    if (novel.source === "novelfire") {
       return `/light-novels/${novel.id}`;
     }
     return `/light-novels/${novel.id}`;
@@ -128,7 +127,7 @@ export default function LightNovelsPage() {
           Light Novels
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Browse and discover light novels — powered by AniList &amp; NovelBin.
+          Browse and discover light novels — powered by AniList &amp; NovelFire.
         </p>
       </div>
 
@@ -226,7 +225,7 @@ export default function LightNovelsPage() {
                         : "bg-emerald-500/80 text-white"
                     }`}
                   >
-                    {novel.source === "anilist" ? "AniList" : "NovelBin"}
+                    {novel.source === "anilist" ? "AniList" : "NovelFire"}
                   </span>
                   {novel.status && (
                     <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-zinc-300">

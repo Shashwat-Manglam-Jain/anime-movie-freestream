@@ -50,7 +50,7 @@ export default function LightNovelDetailPage({
       getNovelBinInfo(novelBinSlugFromUrl)
         .then((info) => {
           if (!info) {
-            setError("Novel not found on NovelBin");
+            setError("Novel not found");
             return;
           }
           setNovel({
@@ -62,7 +62,7 @@ export default function LightNovelDetailPage({
             status: info.status || null,
             description: info.description || null,
             genres: info.genres || [],
-            source: "novelbin",
+            source: "novelfire",
           });
         })
         .catch(() => setError("Failed to load novel"))
@@ -264,7 +264,7 @@ export default function LightNovelDetailPage({
                     : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                 }
               >
-                {novel.source === "anilist" ? "AniList" : "NovelBin"}
+                {novel.source === "anilist" ? "AniList" : "NovelFire"}
               </Badge>
               {novel.score && (
                 <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
@@ -386,7 +386,7 @@ export default function LightNovelDetailPage({
             <div className="rounded-lg border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
               <p>{chaptersError}</p>
               <p className="text-xs text-muted-foreground/70 mt-1">
-                This novel may not be available for free reading on NovelBin.
+                This novel may not be available for free reading.
               </p>
             </div>
           )}

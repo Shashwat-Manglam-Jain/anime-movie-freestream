@@ -287,7 +287,7 @@ export default function DmcaPage() {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="rounded-lg border border-border bg-black/[0.02] dark:bg-white/[0.02] p-4">
-                <p className="text-sm font-medium text-foreground/90">NovelBin</p>
+                <p className="text-sm font-medium text-foreground/90">NovelFire</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Light novel chapter content (proxied for CORS only — no
                   content is stored)

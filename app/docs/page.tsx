@@ -132,7 +132,7 @@ export default function DocsPage() {
                   <p className="text-[10px] text-muted-foreground">Comics / manhwa</p>
                 </div>
                 <div className="rounded-lg border border-rose-500/20 bg-rose-500/[0.06] p-2.5 text-center">
-                  <p className="text-xs font-semibold text-rose-400">NovelBin</p>
+                  <p className="text-xs font-semibold text-rose-400">NovelFire</p>
                   <p className="text-[10px] text-muted-foreground">Light novel chapters</p>
                 </div>
               </div>
@@ -150,7 +150,7 @@ export default function DocsPage() {
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold">1</span>
                 <h4 className="font-semibold text-foreground/90 text-xs">DISCOVER</h4>
               </div>
-              <p className="text-xs">Anikoto + Jikan for anime. MangaDex + ComicK for manga/comics. NovelBin for novels. Curated data for movies/TV.</p>
+              <p className="text-xs">Anikoto + Jikan for anime. MangaDex + ComicK for manga/comics. NovelFire for novels. Curated data for movies/TV.</p>
             </div>
             <div className="rounded-lg bg-black/[0.03] dark:bg-white/[0.03] border border-border p-4 space-y-2">
               <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export default function DocsPage() {
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold">3</span>
                 <h4 className="font-semibold text-foreground/90 text-xs">READ</h4>
               </div>
-              <p className="text-xs">Novel text fetched via /api/novels proxy (NovelBin has no CORS). Manga images loaded directly from MangaDex/ComicK CDN.</p>
+              <p className="text-xs">Novel text fetched via /api/novels proxy (NovelFire has no CORS). Manga images loaded directly from MangaDex/ComicK CDN.</p>
             </div>
             <div className="rounded-lg bg-black/[0.03] dark:bg-white/[0.03] border border-border p-4 space-y-2">
               <div className="flex items-center gap-2">
@@ -407,18 +407,18 @@ export default function DocsPage() {
           </div>
         </div>
 
-        {/* NovelBin */}
+        {/* NovelFire */}
         <div className="rounded-xl bg-black/[0.03] dark:bg-white/[0.03] border border-border p-6 space-y-4">
           <div className="flex items-start gap-4">
-            <ApiIcon letter="NB" color="rose" />
+            <ApiIcon letter="NF" color="rose" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="text-lg font-semibold text-foreground">NovelBin (Chapter Content)</h3>
+                <h3 className="text-lg font-semibold text-foreground">NovelFire (Chapter Content)</h3>
                 <span className="rounded-full bg-yellow-500/10 text-yellow-400 px-2.5 py-0.5 text-xs font-medium">Proxied via /api/novels &mdash; No CORS</span>
               </div>
-              <p className="text-sm text-muted-foreground mt-1">NovelBin has no CORS headers, so requests go through our Next.js API route at <code className="text-violet-400">/api/novels</code>. All actions use GET with query params.</p>
+              <p className="text-sm text-muted-foreground mt-1">NovelFire has no CORS headers, so requests go through our Next.js API route at <code className="text-violet-400">/api/novels</code>. The proxy uses a cascading fallback: NovelFire &rarr; FreeWebNovel &rarr; NovelBin.</p>
               <div className="mt-2 flex flex-wrap gap-2">
-                <span className="text-[10px] text-muted-foreground bg-black/[0.04] dark:bg-white/[0.04] rounded-md px-2 py-0.5 font-mono">novelbin.me (via /api/novels proxy)</span>
+                <span className="text-[10px] text-muted-foreground bg-black/[0.04] dark:bg-white/[0.04] rounded-md px-2 py-0.5 font-mono">novelfire.net (via /api/novels proxy)</span>
                 <span className="text-[10px] text-muted-foreground bg-black/[0.04] dark:bg-white/[0.04] rounded-md px-2 py-0.5">No data stored by smjStreamz</span>
               </div>
             </div>
@@ -427,30 +427,33 @@ export default function DocsPage() {
             <ApiBlock
               label="Search Novels"
               url="GET /api/novels?action=search&q={query}"
-              response='Returns: [{id: "slug", title, image: "https://images.novelbin.me/novel/{slug}.jpg"}]'
+              response='Returns: [{id: "slug", title, image: "https://novelfire.net/server-1/{slug}.jpg"}]'
             />
             <ApiBlock
               label="Novel Info"
               url="GET /api/novels?action=info&id={slug}"
-              response="Returns: {id, title, description, image, author, status, genres[]}"
+              response="Returns: {id, title, description, image, author, status, genres[], source}"
             />
             <ApiBlock
               label="Chapter List"
               url="GET /api/novels?action=chapters&id={slug}"
-              response='Returns: [{id: "slug/chapter-N", title: "Chapter N", url}]'
+              response='Returns: [{id: "slug/chapter-N", title: "Chapter N - Title", url, source}]. Supports paginated chapter lists.'
             />
             <ApiBlock
               label="Read Chapter"
               url="GET /api/novels?action=read&id={slug/chapter-N}"
-              response='Returns: {title, content: "plain text...", prevChapter: "slug/chapter-N-1" | null, nextChapter: "slug/chapter-N+1" | null}'
+              response='Returns: {title, content: "plain text...", prevChapter: "slug/chapter-N-1" | null, nextChapter: "slug/chapter-N+1" | null, source}'
             />
           </div>
           <div className="rounded-lg bg-amber-500/5 border border-amber-500/10 p-3">
             <p className="text-xs text-muted-foreground">
-              <strong className="text-amber-400">Upstream:</strong> The proxy calls <code className="text-amber-300">novelbin.me</code> endpoints:
-              <code className="block mt-1 text-amber-300/70">/ajax/search-novel?keyword=... (XHR header required)</code>
-              <code className="block text-amber-300/70">/ajax/chapter-archive?novelId=... (XHR header required)</code>
-              <code className="block text-amber-300/70">/novel-book/slug/chapter-N (HTML, parse #chr-content div)</code>
+              <strong className="text-amber-400">Upstream (NovelFire):</strong> The proxy scrapes <code className="text-amber-300">novelfire.net</code> pages:
+              <code className="block mt-1 text-amber-300/70">/search?keyword=... (HTML, parse title+href from search results)</code>
+              <code className="block text-amber-300/70">/book/slug/chapters?page=N (HTML, paginated chapter list)</code>
+              <code className="block text-amber-300/70">/book/slug/chapter-N (HTML, parse #content div for text)</code>
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              <strong className="text-amber-400">Fallbacks:</strong> If NovelFire fails, the proxy tries FreeWebNovel (<code className="text-amber-300/70">freewebnovel.com</code>) and then NovelBin (<code className="text-amber-300/70">novelbin.me/com/net</code>).
             </p>
           </div>
         </div>

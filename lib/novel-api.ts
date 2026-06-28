@@ -25,7 +25,7 @@ export interface NormalizedNovel {
   status: string | null;
   description: string | null;
   genres: string[];
-  source: "anilist" | "novelbin";
+  source: "anilist" | "novelbin" | "novelfire";
 }
 
 async function anilistQuery<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
@@ -249,7 +249,7 @@ export async function searchAllSources(
           status: null,
           description: null,
           genres: [],
-          source: "novelbin",
+          source: "novelfire",
         });
       }
     }
