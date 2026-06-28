@@ -1,4 +1,6 @@
 // Strategy: NovelFire (primary) → FreeWebNovel (fallback) → NovelBin (fallback)
+// Edge Runtime bypasses Cloudflare bot detection on upstream novel sites
+export const runtime = "edge";
 
 import { NextRequest } from "next/server";
 
@@ -459,7 +461,7 @@ async function nbFetchHTML(url: string, xhr = false): Promise<string> {
   const headers: Record<string, string> = { "User-Agent": UA };
   if (xhr) headers["X-Requested-With"] = "XMLHttpRequest";
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), 5000);
   try {
     const res = await fetch(url, { headers, redirect: "follow", signal: controller.signal });
     if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
@@ -657,19 +659,25 @@ async function nbReadChapter(chapterId: string) {
 // Combined functions — try NovelFire first, then fallbacks
 // ═══════════════════════════════════════════════════════════════════
 
+const errors: string[] = [];
+
 async function searchNovels(query: string) {
+  errors.length = 0;
   try {
     const results = await nfSearchNovels(query);
     if (results.length > 0) return results;
-  } catch {}
+    errors.push("novelfire: 0 results");
+  } catch (e: unknown) { errors.push(`novelfire: ${e instanceof Error ? e.message : "unknown"}`); }
   try {
     const results = await fwnSearchNovels(query);
     if (results.length > 0) return results;
-  } catch {}
+    errors.push("freewebnovel: 0 results");
+  } catch (e: unknown) { errors.push(`freewebnovel: ${e instanceof Error ? e.message : "unknown"}`); }
   try {
     const results = await nbSearchNovels(query);
     if (results.length > 0) return results;
-  } catch {}
+    errors.push("novelbin: 0 results");
+  } catch (e: unknown) { errors.push(`novelbin: ${e instanceof Error ? e.message : "unknown"}`); }
   return [];
 }
 
@@ -728,7 +736,11 @@ export async function GET(req: NextRequest) {
       case "search": {
         const q = sp.get("q");
         if (!q) return Response.json({ error: "Missing q" }, { status: 400 });
-        return Response.json(await searchNovels(q));
+        const results = await searchNovels(q);
+        if (results.length === 0 && errors.length > 0) {
+          return Response.json({ results: [], errors }, { status: 200 });
+        }
+        return Response.json(results);
       }
 
       case "info": {
