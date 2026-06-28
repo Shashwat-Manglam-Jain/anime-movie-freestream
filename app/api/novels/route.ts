@@ -659,25 +659,19 @@ async function nbReadChapter(chapterId: string) {
 // Combined functions — try NovelFire first, then fallbacks
 // ═══════════════════════════════════════════════════════════════════
 
-const errors: string[] = [];
-
 async function searchNovels(query: string) {
-  errors.length = 0;
   try {
     const results = await nfSearchNovels(query);
     if (results.length > 0) return results;
-    errors.push("novelfire: 0 results");
-  } catch (e: unknown) { errors.push(`novelfire: ${e instanceof Error ? e.message : "unknown"}`); }
+  } catch {}
   try {
     const results = await fwnSearchNovels(query);
     if (results.length > 0) return results;
-    errors.push("freewebnovel: 0 results");
-  } catch (e: unknown) { errors.push(`freewebnovel: ${e instanceof Error ? e.message : "unknown"}`); }
+  } catch {}
   try {
     const results = await nbSearchNovels(query);
     if (results.length > 0) return results;
-    errors.push("novelbin: 0 results");
-  } catch (e: unknown) { errors.push(`novelbin: ${e instanceof Error ? e.message : "unknown"}`); }
+  } catch {}
   return [];
 }
 
@@ -736,11 +730,7 @@ export async function GET(req: NextRequest) {
       case "search": {
         const q = sp.get("q");
         if (!q) return Response.json({ error: "Missing q" }, { status: 400 });
-        const results = await searchNovels(q);
-        if (results.length === 0 && errors.length > 0) {
-          return Response.json({ results: [], errors }, { status: 200 });
-        }
-        return Response.json(results);
+        return Response.json(await searchNovels(q));
       }
 
       case "info": {
